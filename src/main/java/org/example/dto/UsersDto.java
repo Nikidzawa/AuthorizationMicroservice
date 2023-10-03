@@ -1,6 +1,5 @@
-package org.example.Dto;
+package org.example.dto;
 
-import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 @Data

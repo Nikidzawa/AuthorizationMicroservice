@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.Dto.AckDto;
 import org.example.Dto.UsersDto;
-import org.example.controllers.helpers.UserHelper;
+import org.example.controllers.helpers.ControllerHelper;
 import org.example.exceptions.BadRequestException;
 import org.example.factory.UserDtoFactory;
 import org.example.store.Repositories.UserRepository;
@@ -26,11 +26,13 @@ public class UserController {
 
    UserRepository userRepository;
    UserDtoFactory userDtoFactory;
-   UserHelper userHelper;
+   ControllerHelper userHelper;
 
    public  static final String GET_USERS = "/api/users";
-    public static final String CREATE_OR_EDIT_USER = "/api/users";
-    public static final String DELETE_USER = "/api/users/{id}";
+    public static final String REGISTRATION_USER = "/api/users";
+
+
+    public static final String DELETE_USER = "/api/users";
 
     @GetMapping(GET_USERS)
     public List<UsersDto> getAllUsers () {
@@ -40,8 +42,8 @@ public class UserController {
                 .collect(Collectors.toList());
     }
 
-    @PutMapping(CREATE_OR_EDIT_USER)
-    public UsersDto createOrUpdateUser (
+    @PostMapping(REGISTRATION_USER)
+    public UsersDto createUser (
             @RequestParam (value = "id", required = false) Optional <Long> userGetId,
             @RequestParam (value = "name") Optional <String> userGetName,
             @RequestParam (value = "email") Optional <String> userGetEmail,
@@ -55,38 +57,38 @@ public class UserController {
             throw new BadRequestException("User can't be empty");
         }
 
-        final User updateUser = userGetId
+        final User createUser = userGetId
                 .map(userHelper::getProjectOrThrowException)
                 .orElseGet(() -> User.builder().build());
 
         userGetName.ifPresent(userName -> {
             userRepository
                     .findByName(userName)
-                    .filter(anotherUser -> !Objects.equals(anotherUser.getId(), updateUser.getId()))
+                    .filter(anotherUser -> !Objects.equals(anotherUser.getId(), createUser.getId()))
                     .ifPresent(anotherUser -> {
                         throw new BadRequestException (
-                                String.format("User \"%s\" already exists", userName)
+                                String.format("User %s already exists", userName)
                         );
                     });
-            updateUser.setName(userName);
+            createUser.setName(userName);
         });
         userGetEmail.ifPresent(userEmail -> {
             userRepository
                     .findByEmail(userEmail)
-                    .filter(anotherUser -> !Objects.equals(anotherUser.getId(), updateUser.getId()))
+                    .filter(anotherUser -> !Objects.equals(anotherUser.getId(), createUser.getId()))
                     .ifPresent(anotherUser -> {
                         throw new BadRequestException(
-                                String.format("User \"%s\" already exists", userEmail)
+                                String.format("User %s already exists", userEmail)
                         );
                     });
-            updateUser.setEmail(userEmail);
+            createUser.setEmail(userEmail);
         });
 
-        updateUser.setPassword(userPassword);
+        createUser.setPassword(userPassword);
 
-        final User updatedUser = userRepository.saveAndFlush(updateUser);
+        final User createdUser = userRepository.saveAndFlush(createUser);
 
-        return userDtoFactory.makeUserFactory(updatedUser);
+        return userDtoFactory.makeUserFactory(createdUser);
     }
 
     @DeleteMapping(DELETE_USER)

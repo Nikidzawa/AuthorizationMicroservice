@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Transactional
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserHelper {
+public class ControllerHelper {
 
     UserRepository userRepository;
     public User getProjectOrThrowException (Long id) {

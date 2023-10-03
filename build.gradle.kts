@@ -10,15 +10,18 @@ repositories {
     mavenCentral()
 }
 
+//Spring framework
 dependencies {
     implementation("org.springframework.boot", "spring-boot-starter-web")
     implementation("org.springframework.boot" , "spring-boot-starter-data-jpa")
 }
 
+//PostgreSQL
 dependencies {
     implementation("org.postgresql", "postgresql", "42.2.19")
 }
 
+//Lombok
 dependencies {
     compileOnly ("org.projectlombok:lombok:1.18.20")
     testCompileOnly ("org.projectlombok:lombok:1.18.20")
@@ -26,9 +29,7 @@ dependencies {
     testAnnotationProcessor ("org.projectlombok:lombok:1.18.20")
 }
 
-/**
- * Tests
- */
+//Tests
 dependencies {
     testImplementation ("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.7.0")

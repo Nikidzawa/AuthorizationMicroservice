@@ -4,13 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.dto.AckDto;
-import org.example.dto.UsersDto;
+import org.example.Dto.AckDto;
+import org.example.Dto.UsersDto;
 import org.example.controllers.helpers.ControllerHelper;
 import org.example.exceptions.BadRequestException;
+import org.example.exceptions.NotFoundException;
 import org.example.factory.UserDtoFactory;
 import org.example.store.Repositories.UserRepository;
-import org.example.store.entities.User;
+import org.example.store.entities.UserEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,15 +29,14 @@ public class UserController {
    UserDtoFactory userDtoFactory;
    ControllerHelper userHelper;
 
-   public  static final String GET_USERS = "/api/users";
-    public static final String REGISTRATION_USER = "/api/users";
-
-
+    public  static final String GET_USERS = "/api/users";
+    public static final String REGISTRATION_USER = "/api/users/registration";
+    public static final String AUTHORIZATION_USER = "/api/users/authorization";
     public static final String DELETE_USER = "/api/users";
 
     @GetMapping(GET_USERS)
     public List<UsersDto> getAllUsers () {
-        List<User> users = userRepository.findAll();
+        List<UserEntity> users = userRepository.findAll();
         return  users.stream()
                 .map(userDtoFactory::makeUserFactory)
                 .collect(Collectors.toList());
@@ -49,26 +49,16 @@ public class UserController {
             @RequestParam (value = "email") Optional <String> userGetEmail,
             @RequestParam (value = "password") String userPassword )
     {
-        userGetEmail = userGetEmail.filter(userEmail -> !userEmail.trim().isEmpty());
-        userGetName = userGetName.filter(userName -> !userName.trim().isEmpty());
-        boolean isCreate = userGetId.isEmpty();
-
-        if (userGetEmail.isEmpty() && userGetName.isEmpty() && isCreate) {
-            throw new BadRequestException("User can't be empty");
-        }
-
-        final User createUser = userGetId
+        final UserEntity createUser = userGetId
                 .map(userHelper::getProjectOrThrowException)
-                .orElseGet(() -> User.builder().build());
+                .orElseGet(() -> UserEntity.builder().build());
 
         userGetName.ifPresent(userName -> {
             userRepository
                     .findByName(userName)
                     .filter(anotherUser -> !Objects.equals(anotherUser.getId(), createUser.getId()))
                     .ifPresent(anotherUser -> {
-                        throw new BadRequestException (
-                                String.format("User %s already exists", userName)
-                        );
+                        throw new BadRequestException ("Пользователь с таким именем уже существует");
                     });
             createUser.setName(userName);
         });
@@ -77,20 +67,40 @@ public class UserController {
                     .findByEmail(userEmail)
                     .filter(anotherUser -> !Objects.equals(anotherUser.getId(), createUser.getId()))
                     .ifPresent(anotherUser -> {
-                        throw new BadRequestException(
-                                String.format("User %s already exists", userEmail)
-                        );
+                        throw new BadRequestException("Пользователь с такой почтой уже существует");
                     });
             createUser.setEmail(userEmail);
         });
 
         createUser.setPassword(userPassword);
 
-        final User createdUser = userRepository.saveAndFlush(createUser);
+        final UserEntity createdUser = userRepository.saveAndFlush(createUser);
 
         return userDtoFactory.makeUserFactory(createdUser);
     }
+    @GetMapping(AUTHORIZATION_USER)
+    public AckDto authorization(
+            @RequestParam (value = "name", required = false) String userName,
+            @RequestParam (value = "email", required = false) String userEmail,
+            @RequestParam (value = "password") String userPassword )
+    {
+        UserEntity user = null;
+        if (userName != null && userEmail == null) {
+           user = userRepository.findTopByNameAndPassword(userName, userPassword)
+                    .orElse(null);
+        }
+        if (userEmail != null && userName == null) {
+           user = userRepository.findTopByEmailAndPassword(userEmail, userPassword)
+                    .orElse(null);
+        }
+        if (user == null) {
+            throw new NotFoundException("Пользователя не существует");
+        }
 
+        return AckDto.makeDefault(true);
+//Пользователь может авторизовываться как по имени, так и по почте отдельно.
+//Решил, что пусть фронтендер будет получать true. Но можно сделать так, чтобы возвращались все данные о юзере
+    }
     @DeleteMapping(DELETE_USER)
     public AckDto deleteUser (@RequestParam (value = "id") Long id) {
         userHelper.getProjectOrThrowException(id);

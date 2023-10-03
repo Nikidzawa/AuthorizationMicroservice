@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "user_entity")
-public class User {
+public class UserEntity {
     @GeneratedValue (strategy = GenerationType.SEQUENCE)
     @Id
     Long id;

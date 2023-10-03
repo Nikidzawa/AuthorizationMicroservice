@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.exceptions.NotFoundException;
 import org.example.store.Repositories.UserRepository;
-import org.example.store.entities.User;
+import org.example.store.entities.UserEntity;
 import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class ControllerHelper {
 
     UserRepository userRepository;
-    public User getProjectOrThrowException (Long id) {
+    public UserEntity getProjectOrThrowException (Long id) {
        return userRepository
                .findById(id)
                .orElseThrow(() ->

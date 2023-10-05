@@ -20,7 +20,7 @@ public class ControllerHelper {
                .findById(id)
                .orElseThrow(() ->
                        new NotFoundException
-                               (String.format("User \"%s\" doesn't exists" , id))
+                               (String.format("Пользователя с id \"%s\" не существует" , id))
 
                        );
     }

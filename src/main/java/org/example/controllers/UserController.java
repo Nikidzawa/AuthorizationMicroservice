@@ -4,8 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.Dto.AckDto;
-import org.example.Dto.UsersDto;
+import org.example.dto.AckDto;
+import org.example.dto.UsersDto;
 import org.example.controllers.helpers.ControllerHelper;
 import org.example.exceptions.BadRequestException;
 import org.example.exceptions.NotFoundException;
@@ -32,7 +32,7 @@ public class UserController {
     public  static final String GET_USERS = "/api/users";
     public static final String REGISTRATION_USER = "/api/users/registration";
     public static final String AUTHORIZATION_USER = "/api/users/authorization";
-    public static final String DELETE_USER = "/api/users";
+    public static final String DELETE_USER = "/api/users/{id}";
 
     @GetMapping(GET_USERS)
     public List<UsersDto> getAllUsers () {
@@ -69,10 +69,10 @@ public class UserController {
                     .ifPresent(anotherUser -> {
                         throw new BadRequestException("Пользователь с такой почтой уже существует");
                     });
-            createUser.setEmail(userEmail);
+            createUser.setEmail(userEmail); //тут можно запихнуть шифрование
         });
 
-        createUser.setPassword(userPassword);
+        createUser.setPassword(userPassword); //тут можно запихнуть шифрование
 
         final UserEntity createdUser = userRepository.saveAndFlush(createUser);
 
@@ -98,6 +98,7 @@ public class UserController {
         }
 
         return AckDto.makeDefault(true);
+// код костыльный. Необходимо доработать
 //Пользователь может авторизовываться как по имени, так и по почте отдельно.
 //Решил, что пусть фронтендер будет получать true. Но можно сделать так, чтобы возвращались все данные о юзере
     }

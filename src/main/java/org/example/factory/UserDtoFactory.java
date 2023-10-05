@@ -1,6 +1,6 @@
 package org.example.factory;
 
-import org.example.Dto.UsersDto;
+import org.example.dto.UsersDto;
 import org.example.store.entities.UserEntity;
 import org.springframework.stereotype.Component;
 

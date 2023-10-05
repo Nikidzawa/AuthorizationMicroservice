@@ -29,7 +29,7 @@ public class UserController {
    UserDtoFactory userDtoFactory;
    ControllerHelper userHelper;
 
-    public  static final String GET_USERS = "/api/users";
+    public static final String GET_USERS = "/api/users";
     public static final String REGISTRATION_USER = "/api/users/registration";
     public static final String AUTHORIZATION_USER = "/api/users/authorization";
     public static final String DELETE_USER = "/api/users/{id}";

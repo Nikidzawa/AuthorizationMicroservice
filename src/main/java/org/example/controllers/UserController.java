@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.dto.AckDto;
+import org.example.dto.BooleanDto;
 import org.example.dto.UsersDto;
 import org.example.controllers.helpers.ControllerHelper;
 import org.example.exceptions.BadRequestException;
@@ -79,7 +79,7 @@ public class UserController {
         return userDtoFactory.makeUserFactory(createdUser);
     }
     @GetMapping(AUTHORIZATION_USER)
-    public AckDto authorization(
+    public BooleanDto authorization(
             @RequestParam (value = "name", required = false) String userName,
             @RequestParam (value = "email", required = false) String userEmail,
             @RequestParam (value = "password") String userPassword )
@@ -97,15 +97,15 @@ public class UserController {
             throw new NotFoundException("Пользователя не существует");
         }
 
-        return AckDto.makeDefault(true);
+        return BooleanDto.makeDefault(true);
 // код костыльный. Необходимо доработать
 //Пользователь может авторизовываться как по имени, так и по почте отдельно.
 //Решил, что пусть фронтендер будет получать true. Но можно сделать так, чтобы возвращались все данные о юзере
     }
     @DeleteMapping(DELETE_USER)
-    public AckDto deleteUser (@RequestParam (value = "id") Long id) {
+    public BooleanDto deleteUser (@RequestParam (value = "id") Long id) {
         userHelper.getProjectOrThrowException(id);
         userRepository.deleteById(id);
-        return AckDto.makeDefault(true);
+        return BooleanDto.makeDefault(true);
     }
 }

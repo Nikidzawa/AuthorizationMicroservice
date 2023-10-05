@@ -4,7 +4,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/Task-tracker
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgresql
     driver-class-name: org.postgresql.Driver

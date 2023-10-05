@@ -103,7 +103,7 @@ public class UserController {
 //Решил, что пусть фронтендер будет получать true. Но можно сделать так, чтобы возвращались все данные о юзере
     }
     @DeleteMapping(DELETE_USER)
-    public BooleanDto deleteUser (@RequestParam (value = "id") Long id) {
+    public BooleanDto deleteUser (@PathVariable ("id") Long id) {
         userHelper.getProjectOrThrowException(id);
         userRepository.deleteById(id);
         return BooleanDto.makeDefault(true);

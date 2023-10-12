@@ -8,7 +8,6 @@ import org.example.dto.BooleanDto;
 import org.example.dto.UsersDto;
 import org.example.controllers.helpers.ControllerHelper;
 import org.example.exceptions.BadRequestException;
-import org.example.exceptions.NotFoundException;
 import org.example.factory.UserDtoFactory;
 import org.example.store.Repositories.UserRepository;
 import org.example.store.entities.UserEntity;
@@ -32,6 +31,7 @@ public class UserController {
     public static final String GET_USERS = "/api/users";
     public static final String REGISTRATION_USER = "/api/users/registration";
     public static final String AUTHORIZATION_USER = "/api/users/authorization";
+    public static final String EDIT_USER = "/api/users/edit/{id}";
     public static final String DELETE_USER = "/api/users/{id}";
 
     @GetMapping(GET_USERS)
@@ -78,30 +78,56 @@ public class UserController {
 
         return userDtoFactory.makeUserFactory(createdUser);
     }
+
     @GetMapping(AUTHORIZATION_USER)
     public BooleanDto authorization(
-            @RequestParam (value = "name", required = false) String userName,
-            @RequestParam (value = "email", required = false) String userEmail,
+            @RequestParam (value = "email") String userEmail,
             @RequestParam (value = "password") String userPassword )
     {
-        UserEntity user = null;
-        if (userName != null && userEmail == null) {
-           user = userRepository.findTopByNameAndPassword(userName, userPassword)
-                    .orElse(null);
-        }
-        if (userEmail != null && userName == null) {
-           user = userRepository.findTopByEmailAndPassword(userEmail, userPassword)
-                    .orElse(null);
-        }
-        if (user == null) {
-            throw new NotFoundException("Пользователя не существует");
-        }
+      userRepository.findTopByEmailAndPassword(userEmail, userPassword)
+              .orElseThrow(() -> new BadRequestException("Пользователь не найден"));
 
         return BooleanDto.makeDefault(true);
-// код костыльный. Необходимо доработать
-//Пользователь может авторизовываться как по имени, так и по почте отдельно.
-//Решил, что пусть фронтендер будет получать true. Но можно сделать так, чтобы возвращались все данные о юзере
     }
+
+    @PatchMapping (EDIT_USER)
+    public UsersDto EditUser (
+            @PathVariable ("id") Long id,
+            @RequestParam ("name") Optional <String> name,
+            @RequestParam ("email") Optional <String> email,
+            @RequestParam ("password") Optional <String> password)
+    {
+
+        final UserEntity selectedUser = userRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("Пользователя не существует"));
+
+        name.ifPresent(userName -> {
+            userRepository.findByName(userName)
+                    .ifPresent(anotherUser -> {
+                        throw new BadRequestException("Пользователь с таким именем уже существует");
+                    });
+            selectedUser.setName(userName);
+        });
+
+        email.ifPresent(userEmail -> {
+            userRepository.findByEmail(userEmail)
+                .ifPresent(anotherUser -> {
+                    throw new BadRequestException("Пользователь с такой почтой уже существует");
+                });
+        selectedUser.setEmail(userEmail);
+        });
+
+        password.ifPresent(userPassword -> { userRepository.findByPassword(userPassword)
+                .filter(anotherUser -> Objects.equals(anotherUser.getId(), selectedUser.getId()))
+                .ifPresent(anotherUser -> {throw new BadRequestException("Пароли совпадают");
+                });
+            selectedUser.setPassword(userPassword);
+                });
+
+        userRepository.saveAndFlush(selectedUser);
+        return userDtoFactory.makeUserFactory(selectedUser);
+    }
+
     @DeleteMapping(DELETE_USER)
     public BooleanDto deleteUser (@PathVariable ("id") Long id) {
         userHelper.getProjectOrThrowException(id);

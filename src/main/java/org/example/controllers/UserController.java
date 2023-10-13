@@ -36,7 +36,8 @@ public class UserController {
     public static final String DELETE_USER = "/api/users/{id}";
 
     @GetMapping(GET_USERS)
-    public List<UsersDto> getAllUsers () {
+    public List<UsersDto> getAllUsers ()
+    {
         List<UserEntity> users = userRepository.findAll();
         return  users.stream()
                 .map(userDtoFactory::makeUserFactory)
@@ -132,7 +133,8 @@ public class UserController {
     }
 
     @DeleteMapping(DELETE_USER)
-    public BooleanDto deleteUser (@PathVariable ("id") Long id) {
+    public BooleanDto deleteUser (@PathVariable ("id") Long id)
+    {
         userHelper.getProjectOrThrowException(id);
         userRepository.deleteById(id);
         return BooleanDto.makeDefault(true);

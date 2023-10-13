@@ -29,6 +29,7 @@ public class UserController {
    ControllerHelper userHelper;
 
     public static final String GET_USERS = "/api/users";
+    public static final String GET_USER = "/api/users/{id}";
     public static final String REGISTRATION_USER = "/api/users/registration";
     public static final String AUTHORIZATION_USER = "/api/users/authorization";
     public static final String EDIT_USER = "/api/users/edit/{id}";
@@ -41,7 +42,11 @@ public class UserController {
                 .map(userDtoFactory::makeUserFactory)
                 .collect(Collectors.toList());
     }
-
+    @GetMapping(GET_USER)
+    public UserEntity getUser (@PathVariable (value = "id") Long id )
+    {
+        return userHelper.getProjectOrThrowException(id);
+    }
     @PostMapping(REGISTRATION_USER)
     public UsersDto createUser (
             @RequestParam (value = "id", required = false) Optional <Long> userGetId,

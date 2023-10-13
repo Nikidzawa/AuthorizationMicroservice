@@ -56,7 +56,6 @@ public class UserController {
         userGetName.ifPresent(userName -> {
             userRepository
                     .findByName(userName)
-                    .filter(anotherUser -> !Objects.equals(anotherUser.getId(), createUser.getId()))
                     .ifPresent(anotherUser -> {
                         throw new BadRequestException ("Пользователь с таким именем уже существует");
                     });
@@ -65,7 +64,6 @@ public class UserController {
         userGetEmail.ifPresent(userEmail -> {
             userRepository
                     .findByEmail(userEmail)
-                    .filter(anotherUser -> !Objects.equals(anotherUser.getId(), createUser.getId()))
                     .ifPresent(anotherUser -> {
                         throw new BadRequestException("Пользователь с такой почтой уже существует");
                     });

@@ -46,7 +46,7 @@ public class UserController {
     @GetMapping(GET_USER)
     public UserEntity getUser (@PathVariable (value = "id") Long id )
     {
-        return userHelper.getProjectOrThrowException(id);
+        return userHelper.getUserOrThrowException(id);
     }
     @PostMapping(REGISTRATION_USER)
     public UsersDto createUser (
@@ -56,7 +56,7 @@ public class UserController {
             @RequestParam (value = "password") String userPassword )
     {
         final UserEntity createUser = userGetId
-                .map(userHelper::getProjectOrThrowException)
+                .map(userHelper::getUserOrThrowException)
                 .orElseGet(() -> UserEntity.builder().build());
 
         userGetName.ifPresent(userName -> {
@@ -102,8 +102,7 @@ public class UserController {
             @RequestParam ("password") Optional <String> password)
     {
 
-        final UserEntity selectedUser = userRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Пользователя не существует"));
+        final UserEntity selectedUser = userHelper.getUserOrThrowException(id);
 
         name.ifPresent(userName -> {
             userRepository.findByName(userName)
@@ -135,7 +134,7 @@ public class UserController {
     @DeleteMapping(DELETE_USER)
     public BooleanDto deleteUser (@PathVariable ("id") Long id)
     {
-        userHelper.getProjectOrThrowException(id);
+        userHelper.getUserOrThrowException(id);
         userRepository.deleteById(id);
         return BooleanDto.makeDefault(true);
     }

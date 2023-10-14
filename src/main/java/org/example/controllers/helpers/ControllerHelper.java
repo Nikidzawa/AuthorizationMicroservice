@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class ControllerHelper {
 
     UserRepository userRepository;
-    public UserEntity getProjectOrThrowException (Long id) {
+    public UserEntity getUserOrThrowException(Long id) {
        return userRepository
                .findById(id)
                .orElseThrow(() ->
